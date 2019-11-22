@@ -134,6 +134,196 @@ with open("workfile.txt", 'r') as f:
 f.close()
 print(read_data)
 
+#ejemplo de como asignar scopes a namespaces
+def scope_test():
+    def do_local():
+        spam = "local spam"
+
+    def do_nonlocal():
+        nonlocal spam
+        spam = "nonlocal spam"
+
+    def do_global():
+        global spam
+        spam = "global spam"
+
+    spam = "test spam"
+    do_local()
+    print("After local assignment:", spam)
+    do_nonlocal()
+    print("After nonlocal assignment:", spam)
+    do_global()
+    print("After global assignment:", spam)
+
+scope_test()
+print("In global scope:", spam)
+
+#ejemplo de clases
+class MyClass:
+    """A simple example class""" 
+    #esta es una documentacion de la clase que se puede pedir con __doc__
+    i = 12345 #si se pone asi suenta dentro de la clase, es una variable de clase, sino va en el init puesto en el self
+
+    # __init__ es el metodo que se enjecuta en el inicio, siempre le llega un self como parametro de inicio
+    def __init__(self):
+        self.i = self.i+1
+
+    def f(self):
+        return 'hello world'
+
+#si uno lo deja así, los atributos y metodos son publicos
+#para crear una instancia, solo se llama como si fuese un metodo
+
+x = MyClass()
+
+print(MyClass.i)
+print(x.i)
+
+#parece que se pueden hacer cosas locas como estas que es definir una variabnle en el momento dento de un objeto y luego eliminarla
+x.counter = 1
+while x.counter < 10:
+    x.counter = x.counter * 2
+print(x.counter)
+del x.counter
+# print(x.counter) si dejo esto tira un error que dice que no existe la variable .. :)
+
+print(x.f()) #llama a un metodo
+#se puede hacer un lambda con el metodo así:
+
+funcionF = x.f
+print(funcionF())
+
+#hay una forma muy cool de llamar a una función de un objeto que es llama a la clase y pasarle el objeto como parametro, que luego recibirá en la variable self
+
+MyClass.f(x)
+# es lo mismo que llamar a x.f()
+
+#atributo de clase y de instancia, la instancia va en el self
+class Dog:
+    kind = 'canine'         # class variable shared by all instances
+    def __init__(self, name):
+        self.name = name    # instance variable unique to each instance
+
+#si quiero que los trucos sean diferente por perro los tengo que poner como variable de instancia obvio
+class Dog2:
+    def __init__(self, name):
+        self.name = name
+        self.tricks = []    # creates a new empty list for each dog
+    def add_trick(self, trick):
+        self.tricks.append(trick)
+    def _dormir(self):
+        pass
+        #no hay atributos ni funciones privadas, solo por convenio si empieza con underscore sabes que es privado y puede cambiar
+
+perro = Dog("fiby")
+
+print(perro.__class__)
+
+class Cachorro(Dog):
+    def truco(self):
+        print("wow "+self.name)
+
+c = Cachorro("pip")
+c.truco()
+
+print(isinstance(c,Cachorro))
+print(issubclass(Cachorro,Dog))
+
+#truco para usar una clase como una estructura, dado que se le pueden crear directamente las variabels desde afuera
+class Employee:
+    pass
+
+john = Employee()  # Create an empty employee record
+# Fill the fields of the record
+john.name = 'John Doe'
+john.dept = 'computer lab'
+john.salary = 1000
+
+print(str(john))
+
+#ejemplo de como crear un iterador a mano:
+class Reverse:
+    """Iterator for looping over a sequence backwards."""
+    def __init__(self, data):
+        self.data = data
+        self.index = len(data)
+
+    #hay que definir un metodo __iter__
+    def __iter__(self):
+        #el cual devualva un objeto que implemente __next__, se devueve este mismo
+        return self
+
+    def __next__(self):
+        if self.index == 0:
+            #si queremos indicar que terminó, se lanza esta exception
+            raise StopIteration
+        self.index = self.index - 1
+        return self.data[self.index]
+
+rev = Reverse('spam')
+for char in rev:
+    print(char)
 
 
 
+# The yield statement suspends function’s execution and sends a value back to caller, 
+# but retains enough state to enable function to resume where it is left off. When resumed, 
+# the function continues execution immediately after the last yield run. This allows its code to 
+# produce a series of values over time, rather them computing them at once and sending them back like a list.
+# The yield statement suspends function’s execution and sends a value back to caller, but retains 
+# enough state to enable function to resume where it is left off. When resumed, the function 
+# continues execution immediately after the last yield run. This allows its code to produce a 
+# series of values over time, rather them computing them at once and sending them back like a list.
+
+# A Simple Python program to demonstrate working 
+# of yield 
+  
+# A generator function that yields 1 for first time, 
+# 2 second time and 3 third time 
+def simpleGeneratorFun(): 
+    yield 1
+    yield 2
+    yield 3
+  
+# Driver code to check above generator function 
+for value in simpleGeneratorFun():  
+    print(value)
+
+import json
+
+# some JSON:
+x =  '{ "name":"John", "age":30, "city":"New York"}'
+
+# parse x:
+y = json.loads(x)
+
+# the result is a Python dictionary:
+print(y["age"])
+
+x = {
+  "name": "John",
+  "age": 30,
+  "married": True,
+  "divorced": False,
+  "children": ("Ann","Billy"),
+  "pets": None,
+  "cars": [
+    {"model": "BMW 230", "mpg": 27.5},
+    {"model": "Ford Edge", "mpg": 24.1}
+  ]
+}
+
+print(json.dumps(x,indent=4))
+
+
+#como se hace un get de internet
+import urllib.request, json 
+
+with urllib.request.urlopen("http://maps.googleapis.com/maps/api/geocode/json?address=google") as url:
+    data = json.loads(url.read().decode())
+    print(data)
+
+import json,urllib.request
+data = urllib.request.urlopen("https://api.github.com/users?since=100").read()
+output = json.loads(data)
+print ("login: " + output[0]["login"])
