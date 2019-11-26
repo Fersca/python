@@ -1,3 +1,5 @@
+# %matplotlib inline  ---- poner esto si quiero que aparezcan los graficos en jupyter
+
 import matplotlib.pyplot as plt
 import numpy as np
 
