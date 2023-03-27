@@ -83,9 +83,42 @@ def process_job():
         raw_text = json_data['results']['transcripts'][0]['transcript']
         print("------------------------------")
         print(raw_text)
+        return raw_text
 
     else:
         print(f'Transcription job {job_name} has not completed yet')
+        return ""
+
+def create_comprehend_client():
+    comprehend = boto3.client(
+        'comprehend',
+        region_name=aws['region_name'],
+        aws_access_key_id=aws['aws_access_key_id'],
+        aws_secret_access_key=aws['aws_secret_access_key']
+    )
+    return comprehend
+
+
+def sentiment_analysis(text_to_analyse):
+
+    if text_to_analyse == "":
+        return
+
+    # Initialize Amazon Comprehend client
+    comprehend = create_comprehend_client()
+
+    # Call the Sentiment API to analyze the text
+    response = comprehend.detect_sentiment(Text=text_to_analyse, LanguageCode='es')
+
+    # Extract the sentiment score and label from the response
+    sentiment_score = response['SentimentScore']
+    sentiment_label = response['Sentiment']
+
+    # Print the results
+    print("")
+    print("Sentiment score: {}".format(sentiment_score))
+    print("Sentiment label: {}".format(sentiment_label))
+
 
 # Define the S3 bucket and key names
 bucket_name = 'my-transcribe-bucket2'
@@ -101,7 +134,8 @@ if user_input== "y":
     delete_transcription_job()
     transcribe_audio()
 else: 
-    process_job()
+    text_to_analyse = process_job()
+    sentiment_analysis(text_to_analyse)
 
 
 
