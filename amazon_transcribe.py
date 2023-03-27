@@ -99,13 +99,10 @@ def create_comprehend_client():
     return comprehend
 
 
-def sentiment_analysis(text_to_analyse):
+def sentiment_analysis(comprehend, text_to_analyse):
 
     if text_to_analyse == "":
         return
-
-    # Initialize Amazon Comprehend client
-    comprehend = create_comprehend_client()
 
     # Call the Sentiment API to analyze the text
     response = comprehend.detect_sentiment(Text=text_to_analyse, LanguageCode='es')
@@ -118,6 +115,20 @@ def sentiment_analysis(text_to_analyse):
     print("")
     print("Sentiment score: {}".format(sentiment_score))
     print("Sentiment label: {}".format(sentiment_label))
+
+def detect_entities(comprehend, text_to_analyse):
+    # Call the DetectEntities API
+    response = comprehend.detect_entities(
+        Text=text_to_analyse,
+        LanguageCode='es'
+    )
+
+    print()
+    # Print the identified entities
+    sorted_response = sorted(response['Entities'], key=lambda x: x['Score'], reverse=True)
+    for entity in sorted_response:
+        print('Score:', int(round(entity['Score'], 2)*100),'%','Entity:', entity['Text'])
+
 
 
 # Define the S3 bucket and key names
@@ -135,7 +146,14 @@ if user_input== "y":
     transcribe_audio()
 else: 
     text_to_analyse = process_job()
-    sentiment_analysis(text_to_analyse)
+
+    print("")
+    user_input = input("Perform Sentimental Analysis? (y/n): ")
+    if user_input== "y":
+        # Initialize Amazon Comprehend client
+        comprehend = create_comprehend_client()
+        sentiment_analysis(comprehend, text_to_analyse)
+        detect_entities(comprehend, text_to_analyse)
 
 
 
